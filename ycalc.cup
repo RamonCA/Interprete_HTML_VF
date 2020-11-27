@@ -1,0 +1,289 @@
+
+import java_cup.runtime.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;  
+action code {:
+
+ public String x = "" ; 
+ 
+ public String pl(String pr){
+ 	if(pr.equals("parrafo"))
+ 		return "p";
+ 	return "label";	
+ }
+ 
+ public String y = "" ;
+ 
+ public String ctext(String tx){
+ 	return tx.replace("\"","");
+ }
+ 
+ public String titulo = "" ;
+ 
+ 
+ public void pagina(String x){
+ 	File fold=new File("Pagina.html");
+	fold.delete();
+	File fnew=new File("Pagina.html");
+	String source = x;
+	System.out.println(source);
+	
+	try {
+       FileWriter f2 = new FileWriter(fnew, false);
+       f2.write(source);
+       f2.close();
+	} catch (IOException e) {
+       e.printStackTrace();
+	}           
+ }
+ 
+ public String tabla="";
+ 
+ public String creacionTabla(String digito, String digito2){
+ 	String contenido="<table border = \"\">\n";
+ 	int d=Integer.parseInt(digito);
+ 	int d2=Integer.parseInt(digito2);
+ 	
+ 	for(int i=0; i<d; i++ ){
+ 		for(int j=0; j<d2; j++){
+ 			contenido=contenido.concat("<td>subitem"+j+"</td>\n");
+ 			if(j==d2-1){
+ 				contenido=contenido.concat("</tr>\n");
+ 			}
+ 		}
+ 	}
+ 	contenido=contenido.concat("</table>");
+ 	return contenido;
+ }
+ 
+ public String form = "";
+ 
+ public String form (String digito){
+ 	String formulario = "<br>\n<form>\n";
+ 	switch (digito) {
+ 		 
+ 		 case "1":
+ 		 	formulario = formulario.concat(" \"Formulario en blanco aqui añade tu codigo\" </form><br>");
+		 break;
+ 		 
+ 		 case "2":
+ 		 	for (int i = 0; i<3; i++) {
+ 		 		formulario = formulario.concat("<label>nombre del campo</label><br>\n<input type=\"text\"><br>\n");
+ 		 	}
+ 		 	formulario = formulario.concat ("<br>\n<input type=\"submit\" value=\"Submit\">\n</form><br>"); 
+ 		 break;
+ 		 
+ 		 case "3":
+ 		 	
+ 		 	for (int i = 0; i<4; i++) {
+ 		 		int op = i+1;
+ 		 		formulario = formulario.concat("<input type=\"radio\" id=\"idt "+ op +"\" name=\"idn\" value=\"opcion "+ op +"\">");
+ 		 		formulario = formulario.concat("\n<label for=\"idt"+op+"\">opcion "+op+"</label><br>\n");
+ 		 	}
+ 		 	formulario = formulario.concat ("<br>\n<input type=\"submit\" value=\"Submit\">\n</form><br>"); 
+ 		 break;
+ 		 
+ 		 case "4":
+ 		 	for (int i = 0; i<4; i++) {
+ 		 		int op = i+1;
+ 		 		formulario = formulario.concat("<input type=\"checkbox\" id=\"idt "+ op +"\" name=\"idn "+ op +"value=\"opcion "+ op +"\">");
+ 		 		formulario = formulario.concat("\n<label for=\"idt"+op+"\">opcion "+op+"</label><br>\n");
+ 		 	}
+ 		 	formulario = formulario.concat ("<br>\n<input type=\"submit\" value=\"Submit\">\n</form><br>"); 
+ 		 break;
+ 		 
+ 		 case "5":
+ 		 	formulario = formulario.concat(creacionTabla("3","3"));
+ 		 	formulario = formulario.concat ("<br>\n<input type=\"submit\" value=\"Submit\">\n</form><br>"); 
+ 		 break;
+ 		 
+ 		 case "6":
+ 		 	for (int i = 0; i<3; i++) {
+ 		 		formulario = formulario.concat("<label>nombre del campo</label><br>\n<input type=\"text\"><br>\n");
+ 		 	}
+ 		 	
+ 		 	for (int i = 0; i<2; i++) {
+ 		 		int op = i+1;
+ 		 		formulario = formulario.concat("<input type=\"radio\" id=\"idt "+ op +"\" name=\"idn\" value=\"opcion "+ op +"\">\n");
+ 		 		formulario = formulario.concat("\n<label for=\"idt"+op+"\">opcion "+op+"</label><br>\n");
+ 		 	}
+ 		 	
+ 		 	formulario = formulario.concat ("<br>\n<input type=\"submit\" value=\"Submit\">\n</form><br>"); 
+ 		 	
+ 		 break;
+ 		 
+ 	}
+ 	return formulario;
+ }
+ 
+ public String validacionImg(String texto){
+	if(texto.contains(".jpg") || texto.contains(".jpeg") || texto.contains(".png"))
+		return texto;
+ 	return "Formato de imagen no valido";
+ }
+ 
+ public String validacionVin(String texto){
+ 	String []algo=texto.split("\\.");
+ 	if(algo.length>2){
+ 		return texto;
+ 	}
+ 	return "URL no valida";
+ }
+ 
+:}
+parser code {:
+
+   
+    
+    
+    public void report_error(String message, Object info) {
+   
+        StringBuilder m = new StringBuilder("Error");
+   
+         if (info instanceof java_cup.runtime.Symbol) {
+            
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+   
+             if (s.left >= 0) {                
+                  m.append(" in line "+(s.left+1));   
+               	 
+               	  if (s.right >= 0)                    
+                 	 m.append(", column "+(s.right+1));
+            }
+        }
+   
+        m.append(" : "+message);
+   
+        System.err.println(m);
+    }
+   
+    
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+:};
+   
+
+   
+/* ------------Declaration of Terminals and Non Terminals Section----------- */
+   
+
+terminal           SEMI, UNION, COMA, LPAREN, RPAREN, ESPACIO, IMAGEN, ENCABEZADO, VINCULO, TITULO, CONTENEDOR, ATEXTO,FIN, TABLA, FORMULARIO;
+terminal String    TEXTO, DIGITO, PR;
+   
+non terminal Object     expr_list, expr_part;
+non terminal String     S, A, E, H, P, T, F;
+  
+
+/* -------------Precedence and Associatively of Terminals Section----------- */
+       
+
+/* ----------------------------Grammar Section-------------------- */
+   
+/*----------------------------------------------   
+   expr_list ::=   expr_list expr_part
+                 | expr_part               
+			
+	expr_part ::=  S SEMI
+			S -> titulo texto .  
+			S -> A .
+			A -> P .
+			A -> E .
+			A -> imagen texto .
+			A -> vinculo url + texto.
+			A -> contenedor ( H ) .
+			A -> aTexto .
+			A -> T .
+			A -> F
+			P -> pR texto .
+			P -> pR E + texto .
+			P -> pR .
+			E -> encabezado ( digito ) texto .
+			H -> A .
+			H -> A , H .
+			T -> tabla ( digito , digito ) .
+			F -> formulario ( digito ) .
+			
+						
+----------------------------------------------------*/
+   
+   expr_list ::= expr_list expr_part
+                 |
+                 expr_part
+                 ;
+               
+   expr_part ::= S:s
+   				 {: x+=s; :}
+   				 SEMI
+   				 ;
+   				 
+   	S ::= TITULO TEXTO:tx
+   		  {: titulo=ctext(tx) ; RESULT = ""; :}
+   		  |
+   		  A:a
+   		  {: RESULT = a; :}
+   		  |
+   		  FIN
+   		  {: x="<!DOCTYPE html>\n<html>\n<head>\n<title>\n" + titulo + "\n</title>\n</head>\n\n<body>\n"+ x +"\n</body>\n\n</html>"; 
+   		  	 pagina(x);
+   		  :}
+   		  ;
+   		  
+   	A ::= P:p
+   		  {: RESULT = p; :}
+   		  |
+   		  E:e
+   		  {: RESULT = e; :}
+   		  |
+   		  IMAGEN TEXTO:tx
+   		  {: RESULT = "\n<img src="+ validacionImg(tx) +">"; :}
+   		  |
+   		  VINCULO TEXTO:tx UNION TEXTO:t
+   		  {: RESULT = "\n<a href="+ validacionVin(tx) +">"+ ctext(t) +"</a>"; :}
+   		  |
+   		  CONTENEDOR LPAREN H:h RPAREN
+   		  {: RESULT = "\n<div>"+ h +"\n</div>"; :} 
+   		  |
+   		  ATEXTO
+   		  {: RESULT = "\n<textarea></textarea>"; :}  
+   		  |
+   		  T:t
+   		  {: RESULT =t	; :}
+   		  |
+   		  F:f	  
+   		  {: RESULT =f	; :}
+   		  ;
+   		 
+   	P ::= PR:pr TEXTO:tx
+   		  {: y=pl(pr); RESULT = "\n<"+ y +">"+ ctext(tx) +"\n</"+ y +">"; :}
+   		  |
+   		  PR:pr E:e UNION TEXTO:tx
+   		  {: y=pl(pr); RESULT = "\n<"+ y +">"+ e + ctext(tx) +"\n</"+ y +">"; :}
+   		  |
+   		  PR:pr
+   		  {: y=pl(pr); RESULT = "\n<"+ y +">\n</"+ y +">"; :}
+   		  ;
+   		  
+    E ::= ENCABEZADO LPAREN DIGITO:d RPAREN TEXTO:tx
+   		  {: RESULT = "\n<h"+ d +">"+ ctext(tx) +"</h"+ d +">"; :}
+   		  ;
+   		  
+   	H ::= A:a
+   		  {: RESULT = a; :}
+   		  |
+   		  A:a COMA H:h
+   		  {: RESULT = a + h; :}
+   		  ;  
+   		  
+   	T ::= TABLA:t LPAREN DIGITO:d COMA DIGITO:d2 RPAREN
+   		  {:tabla=creacionTabla(d,d2) ; RESULT =tabla ; :}
+   		  ;
+   	
+   	F ::= FORMULARIO:f LPAREN DIGITO:d RPAREN
+   		  {: form = form(d) ; RESULT = form	; :}
+   		  ;		 
+                 
+  
